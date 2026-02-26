@@ -1,0 +1,1030 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI 첫걸음 — 강사를 위한 실전 AI 활용</title>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap"
+    rel="stylesheet">
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+  <style>
+    a.platform {
+      color: inherit;
+      text-decoration: none;
+      border-bottom: 1px dashed rgba(80, 60, 200, .35);
+      transition: .2s
+    }
+
+    a.platform:hover {
+      color: #0694c2;
+      border-bottom-color: #0694c2
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box
+    }
+
+    body {
+      font-family: 'Noto Sans KR', sans-serif;
+      background: #eef1fb;
+      color: #1a1a3e;
+      overflow: hidden;
+      height: 100vh
+    }
+
+    .deck {
+      width: 100%;
+      height: 100vh;
+      position: relative
+    }
+
+    .slide {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 60px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity .5s, transform .5s;
+      transform: translateX(60px)
+    }
+
+    .slide.active {
+      opacity: 1;
+      pointer-events: all;
+      transform: translateX(0)
+    }
+
+    .slide.prev {
+      opacity: 0;
+      transform: translateX(-60px)
+    }
+
+    /* Progress */
+    .progress {
+      position: fixed;
+      top: 0;
+      left: 0;
+      height: 4px;
+      background: linear-gradient(90deg, #6c63ff, #38bdf8);
+      transition: width .4s;
+      z-index: 100
+    }
+
+    .slide-num {
+      position: fixed;
+      bottom: 24px;
+      right: 32px;
+      font-size: 16px;
+      color: rgba(50, 50, 100, .45);
+      z-index: 100
+    }
+
+    .nav {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      gap: 12px;
+      z-index: 100
+    }
+
+    .nav button {
+      background: rgba(255, 255, 255, .75);
+      border: 1px solid rgba(108, 99, 255, .3);
+      color: #4a3f9f;
+      padding: 8px 24px;
+      border-radius: 20px;
+      cursor: pointer;
+      font-family: 'Noto Sans KR', sans-serif;
+      font-size: 17px;
+      transition: .2s;
+      backdrop-filter: blur(6px)
+    }
+
+    .nav button:hover {
+      background: rgba(108, 99, 255, .15);
+      border-color: #6c63ff
+    }
+
+    /* Backgrounds */
+    .bg-hero {
+      background: linear-gradient(135deg, #dde4ff 0%, #eee8ff 50%, #daeeff 100%)
+    }
+
+    .bg-dark {
+      background: linear-gradient(160deg, #f0f4ff, #eaecfb)
+    }
+
+    .bg-purple {
+      background: linear-gradient(135deg, #ede8ff, #dce6ff)
+    }
+
+    .bg-teal {
+      background: linear-gradient(135deg, #daf4ff, #e4f9ff)
+    }
+
+    .bg-green {
+      background: linear-gradient(135deg, #d9fdf0, #e4fef5)
+    }
+
+    /* Typography */
+    .tag {
+      display: inline-block;
+      background: rgba(108, 99, 255, .12);
+      border: 1px solid rgba(108, 99, 255, .35);
+      color: #5b4fcf;
+      padding: 6px 18px;
+      border-radius: 20px;
+      font-size: 16px;
+      margin-bottom: 20px;
+      letter-spacing: 1px
+    }
+
+    .tag.cyan {
+      background: rgba(6, 148, 194, .1);
+      border-color: rgba(6, 148, 194, .35);
+      color: #0694c2
+    }
+
+    .tag.green {
+      background: rgba(5, 150, 90, .1);
+      border-color: rgba(5, 150, 90, .3);
+      color: #05965a
+    }
+
+    .tag.orange {
+      background: rgba(200, 100, 0, .1);
+      border-color: rgba(200, 100, 0, .3);
+      color: #b45a00
+    }
+
+    h1.hero {
+      font-size: clamp(38px, 6vw, 77px);
+      font-weight: 900;
+      line-height: 1.15;
+      text-align: center;
+      background: linear-gradient(90deg, #2d2280 30%, #5b4fcf);
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent
+    }
+
+    h2.title {
+      font-size: clamp(29px, 4.2vw, 53px);
+      font-weight: 700;
+      margin-bottom: 12px
+    }
+
+    h3.sec {
+      font-size: clamp(22px, 3vw, 36px);
+      font-weight: 600;
+      color: #5b4fcf;
+      margin-bottom: 24px
+    }
+
+    p.sub {
+      font-size: clamp(17px, 1.8vw, 22px);
+      color: rgba(30, 30, 80, .6);
+      line-height: 1.8;
+      max-width: 700px;
+      text-align: center
+    }
+
+    /* Cards */
+    .cards {
+      display: flex;
+      gap: 20px;
+      flex-wrap: wrap;
+      justify-content: center;
+      width: 100%;
+      max-width: 1100px
+    }
+
+    .card {
+      background: rgba(255, 255, 255, .75);
+      border: 1px solid rgba(108, 99, 255, .15);
+      border-radius: 16px;
+      padding: 24px;
+      flex: 1;
+      min-width: 200px;
+      transition: .3s;
+      box-shadow: 0 2px 12px rgba(108, 99, 255, .08)
+    }
+
+    .card:hover {
+      background: rgba(255, 255, 255, .95);
+      border-color: rgba(108, 99, 255, .35);
+      transform: translateY(-4px);
+      box-shadow: 0 8px 24px rgba(108, 99, 255, .15)
+    }
+
+    .card .icon {
+      font-size: 32px;
+      margin-bottom: 12px
+    }
+
+    .card h4 {
+      font-size: 19px;
+      font-weight: 700;
+      margin-bottom: 8px;
+      color: #2d2280
+    }
+
+    .card p {
+      font-size: 16px;
+      color: rgba(30, 30, 80, .6);
+      line-height: 1.6
+    }
+
+    /* Table */
+    .tbl {
+      width: 100%;
+      max-width: 1000px;
+      border-collapse: collapse;
+      font-size: 17px
+    }
+
+    .tbl th {
+      background: rgba(108, 99, 255, .15);
+      padding: 12px 16px;
+      text-align: center;
+      border: 1px solid rgba(108, 99, 255, .15);
+      color: #3d31a0
+    }
+
+    .tbl td {
+      padding: 10px 14px;
+      text-align: center;
+      border: 1px solid rgba(108, 99, 255, .1);
+      background: rgba(255, 255, 255, .6)
+    }
+
+    .tbl tr:nth-child(even) td {
+      background: rgba(240, 240, 255, .7)
+    }
+
+    .tbl .hi {
+      color: #4a3fcf;
+      font-weight: 700
+    }
+
+    /* List */
+    .list {
+      list-style: none;
+      max-width: 800px;
+      width: 100%
+    }
+
+    .list li {
+      padding: 12px 0;
+      border-bottom: 1px solid rgba(108, 99, 255, .12);
+      font-size: 19px;
+      display: flex;
+      gap: 14px;
+      align-items: flex-start
+    }
+
+    .list li .em {
+      color: #0694c2;
+      font-weight: 700;
+      min-width: 140px
+    }
+
+    /* Steps */
+    .steps {
+      display: flex;
+      gap: 16px;
+      max-width: 900px;
+      width: 100%;
+      flex-wrap: wrap;
+      justify-content: center
+    }
+
+    .step {
+      background: rgba(255, 255, 255, .8);
+      border: 1px solid rgba(108, 99, 255, .18);
+      border-radius: 12px;
+      padding: 20px;
+      flex: 1;
+      min-width: 160px;
+      position: relative;
+      box-shadow: 0 2px 10px rgba(108, 99, 255, .08)
+    }
+
+    .step .num {
+      position: absolute;
+      top: -14px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: linear-gradient(135deg, #6c63ff, #38bdf8);
+      border-radius: 50%;
+      width: 28px;
+      height: 28px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      font-weight: 700;
+      color: #fff
+    }
+
+    .step p {
+      font-size: 16px;
+      color: rgba(30, 30, 80, .65);
+      line-height: 1.6;
+      text-align: center;
+      margin-top: 8px
+    }
+
+    /* RCAT */
+    .rcat {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      max-width: 800px;
+      width: 100%
+    }
+
+    .rcat-item {
+      background: rgba(255, 255, 255, .8);
+      border-radius: 12px;
+      padding: 20px;
+      border-left: 4px solid #6c63ff;
+      box-shadow: 0 2px 10px rgba(108, 99, 255, .08)
+    }
+
+    .rcat-item.c {
+      border-color: #0694c2
+    }
+
+    .rcat-item.a {
+      border-color: #05965a
+    }
+
+    .rcat-item.t {
+      border-color: #b45a00
+    }
+
+    .rcat-item .letter {
+      font-size: 34px;
+      font-weight: 900;
+      margin-bottom: 4px
+    }
+
+    .rcat-item h4 {
+      font-size: 18px;
+      font-weight: 700;
+      margin-bottom: 6px;
+      color: #2d2280
+    }
+
+    .rcat-item p {
+      font-size: 14px;
+      color: rgba(30, 30, 80, .6)
+    }
+
+    /* Bubble */
+    .bubble {
+      background: rgba(255, 255, 255, .7);
+      border: 1px solid rgba(108, 99, 255, .2);
+      border-radius: 16px;
+      padding: 20px 28px;
+      text-align: center
+    }
+
+    .bubble.good {
+      border-color: rgba(5, 150, 90, .4);
+      background: rgba(5, 150, 90, .06)
+    }
+
+    .bubble.bad {
+      border-color: rgba(200, 50, 50, .3);
+      background: rgba(200, 50, 50, .05)
+    }
+
+    /* Timeline */
+    .timeline {
+      display: flex;
+      gap: 0;
+      max-width: 900px;
+      width: 100%;
+      position: relative
+    }
+
+    .timeline::before {
+      content: '';
+      position: absolute;
+      top: 24px;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, #6c63ff, #00d4ff)
+    }
+
+    .tl-item {
+      flex: 1;
+      padding-top: 50px;
+      position: relative;
+      text-align: center
+    }
+
+    .tl-dot {
+      position: absolute;
+      top: 16px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #6c63ff, #00d4ff)
+    }
+
+    .tl-item h4 {
+      font-size: 16px;
+      font-weight: 700;
+      color: #5b4fcf;
+      margin-bottom: 4px
+    }
+
+    .tl-item p {
+      font-size: 13px;
+      color: rgba(30, 30, 80, .6)
+    }
+
+    /* Highlight box */
+    .hbox {
+      background: linear-gradient(135deg, rgba(108, 99, 255, .1), rgba(56, 189, 248, .08));
+      border: 1px solid rgba(108, 99, 255, .25);
+      border-radius: 16px;
+      padding: 24px 32px;
+      max-width: 700px;
+      text-align: center
+    }
+
+    .hbox p {
+      font-size: 22px;
+      line-height: 1.8;
+      font-weight: 500;
+      color: #1a1a3e
+    }
+
+    .hbox span {
+      color: #0694c2;
+      font-weight: 700
+    }
+
+    /* Glow orbs */
+    .orb {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(90px);
+      opacity: .30;
+      pointer-events: none
+    }
+
+    .orb1 {
+      width: 400px;
+      height: 400px;
+      background: #c4b5fd;
+      top: -100px;
+      right: -100px
+    }
+
+    .orb2 {
+      width: 300px;
+      height: 300px;
+      background: #7dd3fc;
+      bottom: -80px;
+      left: -80px
+    }
+
+    .icon i[data-lucide] {
+      width: 40px;
+      height: 40px;
+      stroke-width: 1.5;
+      color: #5b4fcf
+    }
+
+    .licon {
+      width: 17px;
+      height: 17px;
+      stroke-width: 2;
+      vertical-align: middle;
+      margin-right: 5px;
+      display: inline-block
+    }
+
+    .th-icon {
+      width: 15px;
+      height: 15px;
+      stroke-width: 2;
+      vertical-align: middle;
+      margin-right: 3px
+    }
+  </style>
+</head>
+
+<body>
+  <div class="progress" id="prog"></div>
+  <div class="slide-num" id="snum"></div>
+  <div class="deck" id="deck">
+
+    <!-- SLIDE 1: TITLE -->
+    <div class="slide bg-hero active" id="s1">
+      <div class="orb orb1"></div>
+      <div class="orb orb2"></div>
+      <div class="tag">2026 강사 AI 특강</div>
+      <h1 class="hero">AI 첫걸음<br>강사를 위한 실전 AI 활용</h1>
+      <br>
+      <p class="sub">ChatGPT · Gemini · Perplexity · Grok · NotebookLM<br>오늘 2시간으로 AI 활용 강사로 거듭납니다</p>
+      <br><br>
+      <p style="font-size:17px;color:rgba(30,30,100,.45)">⬅ ➡ 키보드 방향키로 이동 &nbsp;|&nbsp; 총 15장</p>
+    </div>
+
+    <!-- SLIDE 2: AGENDA -->
+    <div class="slide bg-dark" id="s2">
+      <div class="tag cyan">오늘의 여정</div>
+      <h2 class="title">2시간 안에 이걸 다 배웁니다</h2>
+      <br>
+      <div class="cards">
+        <div class="card">
+          <div class="icon"><i data-lucide="brain"></i></div>
+          <h4>1부 · 30분</h4>
+          <p>AI & LLM이란?<br>강사에게 필요한 이유<br>사용 시 주의사항</p>
+        </div>
+        <div class="card">
+          <div class="icon"><i data-lucide="scale"></i></div>
+          <h4>2부 · 25분</h4>
+          <p>4대 AI 플랫폼 비교<br>무료·유료 요금제<br>상황별 추천</p>
+        </div>
+        <div class="card">
+          <div class="icon"><i data-lucide="pencil-line"></i></div>
+          <h4>실습① · 15분</h4>
+          <p>프롬프트 기본 공식<br>RCAT 방법론<br>직접 작성 실습</p>
+        </div>
+        <div class="card">
+          <div class="icon"><i data-lucide="notebook-text"></i></div>
+          <h4>3부+실습② · 30분</h4>
+          <p>NotebookLM 완전정복<br>핵심 기능 6가지<br>강사 시나리오 실습</p>
+        </div>
+        <div class="card">
+          <div class="icon"><i data-lucide="map"></i></div>
+          <h4>마무리 · 15분</h4>
+          <p>복습 정리<br>30일 로드맵<br>Q&A</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 3: AI LLM이란 -->
+    <div class="slide bg-purple" id="s3">
+      <div class="orb orb1"></div>
+      <div class="tag">1부 — AI 이해하기</div>
+      <h2 class="title">AI · LLM, 도대체 뭔가요?</h2>
+      <br>
+      <div class="hbox">
+        <p>LLM(대형 언어 모델)은<br><span>매우 똑똑한 자동완성</span>입니다<br><br>우리가 카카오톡에서 다음 단어를 예측하듯,<br>수백억 개 문장을 학습해 <span>대화하는
+            AI</span>입니다</p>
+      </div>
+      <br>
+      <div class="cards" style="max-width:800px">
+        <div class="card">
+          <div class="icon"><i data-lucide="calendar"></i></div>
+          <h4>2022년 11월</h4>
+          <p>ChatGPT 출시 — 5일 만에 100만 사용자 돌파</p>
+        </div>
+        <div class="card">
+          <div class="icon"><i data-lucide="rocket"></i></div>
+          <h4>2023~2024</h4>
+          <p>생성형 AI 폭발적 성장 — Gemini, Claude, Llama 등장</p>
+        </div>
+        <div class="card">
+          <div class="icon"><i data-lucide="bot"></i></div>
+          <h4>2025~현재</h4>
+          <p>AI 에이전트 시대 — AI가 스스로 작업을 수행</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 4: 강사에게 필요한 이유 -->
+    <div class="slide bg-dark" id="s4">
+      <div class="tag green">강사 업무 혁신</div>
+      <h2 class="title">강사에게 AI가 필요한 이유</h2>
+      <h3 class="sec" style="color:#05965a;font-size:19px">강의 준비 시간 50% 단축 — 지금 바로 가능합니다</h3>
+      <ul class="list">
+        <li><span class="em"><i data-lucide="clipboard-list" class="licon"></i>강의안 작성</span>주제를 입력하면 목차 초안이 수십 초 안에
+          완성됩니다</li>
+        <li><span class="em"><i data-lucide="file-pen-line" class="licon"></i>교안·자료 정리</span>PDF 업로드 → 요약본, 퀴즈, 학습가이드 자동
+          생성</li>
+        <li><span class="em"><i data-lucide="help-circle" class="licon"></i>수강생 Q&A</span>어려운 질문 → AI가 쉬운 설명 초안 즉시 제공
+        </li>
+        <li><span class="em"><i data-lucide="megaphone" class="licon"></i>홍보 문구</span>강의 정보 입력 → SNS 카피·모집 공고 자동 생성</li>
+        <li><span class="em"><i data-lucide="globe" class="licon"></i>해외 자료</span>영어 PDF → 한국어 요약 번역 완성</li>
+      </ul>
+      <br>
+      <div class="hbox" style="padding:14px 24px">
+        <p style="font-size:19px"><span>AI를 쓰는 강사</span>가 쓰지 않는 강사를 대체합니다</p>
+      </div>
+    </div>
+
+    <!-- SLIDE 5: 주의사항 -->
+    <div class="slide bg-dark" id="s5">
+      <div class="tag orange">꼭 알아야 할 것</div>
+      <h2 class="title">AI 사용 시 주의사항 3가지</h2>
+      <br>
+      <div class="cards" style="max-width:900px">
+        <div class="card" style="border-top:3px solid #ff5050">
+          <div class="icon"><i data-lucide="alert-triangle" style="color:#c0302a"></i></div>
+          <h4>환각(Hallucination)</h4>
+          <p>AI는 틀린 내용을 자신있게 말할 수 있습니다<br><br><strong style="color:#c0302a">→ AI 답변은 반드시 검증하세요</strong></p>
+        </div>
+        <div class="card" style="border-top:3px solid #ffa000">
+          <div class="icon"><i data-lucide="lock" style="color:#a05a00"></i></div>
+          <h4>개인정보·저작권</h4>
+          <p>학생 이름, 연락처 등 민감정보는 절대 입력 금지<br><br><strong style="color:#a05a00">→ 민감 정보는 가려서 사용하세요</strong></p>
+        </div>
+        <div class="card" style="border-top:3px solid #00d4ff">
+          <div class="icon"><i data-lucide="shield-check" style="color:#0076a8"></i></div>
+          <h4>최종 판단은 내가</h4>
+          <p>AI의 결과물 = 초안<br>전문가로서 검토·수정은 필수<br><br><strong style="color:#0076a8">→ AI는 조수, 결정은 강사가</strong></p>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 6: 플랫폼 비교 -->
+    <div class="slide bg-purple" id="s6">
+      <div class="tag">2부 — 플랫폼 비교</div>
+      <h2 class="title">4대 AI 플랫폼 한눈에 보기</h2>
+      <br>
+      <table class="tbl">
+        <tr>
+          <th>구분</th>
+          <th><i data-lucide="message-circle" class="th-icon"></i> <a class="platform" href="https://chat.openai.com"
+              target="_blank">ChatGPT</a></th>
+          <th><i data-lucide="sparkles" class="th-icon"></i> <a class="platform" href="https://gemini.google.com"
+              target="_blank">Gemini</a></th>
+          <th><i data-lucide="search" class="th-icon"></i> <a class="platform" href="https://www.perplexity.ai"
+              target="_blank">Perplexity</a></th>
+          <th><i data-lucide="zap" class="th-icon"></i> <a class="platform" href="https://grok.com"
+              target="_blank">Grok</a></th>
+        </tr>
+        <tr>
+          <td>만든 곳</td>
+          <td>OpenAI</td>
+          <td>Google</td>
+          <td>Perplexity AI</td>
+          <td>xAI (일론 머스크)</td>
+        </tr>
+        <tr>
+          <td>강점</td>
+          <td class="hi">범용 최강<br>다양한 작업</td>
+          <td class="hi">한글 성능 우수<br>Google 연동</td>
+          <td>실시간 검색<br>출처 표시</td>
+          <td>최신 뉴스<br>X(트위터) 연동</td>
+        </tr>
+        <tr>
+          <td>약점</td>
+          <td>유료 제한 많음</td>
+          <td>문서업로드 제한</td>
+          <td>창작 능력 약함</td>
+          <td>한국어 다소 부족</td>
+        </tr>
+        <tr>
+          <td>무료</td>
+          <td>✅ 제한적</td>
+          <td class="hi">✅ 넉넉함</td>
+          <td>✅ 기본검색</td>
+          <td>✅ X계정 필요</td>
+        </tr>
+        <tr>
+          <td>유료</td>
+          <td>$20/월 Plus</td>
+          <td>$19.99/월 Advanced</td>
+          <td>$20/월 Pro</td>
+          <td>$8/월 Premium+</td>
+        </tr>
+        <tr>
+          <td>강사 추천도</td>
+          <td>⭐⭐⭐⭐⭐</td>
+          <td class="hi">⭐⭐⭐⭐⭐</td>
+          <td>⭐⭐⭐⭐</td>
+          <td>⭐⭐⭐</td>
+        </tr>
+      </table>
+    </div>
+
+    <!-- SLIDE 7: 상황별 추천 -->
+    <div class="slide bg-teal" id="s7">
+      <div class="tag cyan">상황별 Best Pick</div>
+      <h2 class="title">어떤 AI를 써야 할까요?</h2>
+      <br>
+      <ul class="list" style="max-width:750px">
+        <li><span class="em"><i data-lucide="clipboard-list" class="licon"></i>강의 자료 초안</span>ChatGPT 또는 Gemini — 목차·내용
+          생성 최강</li>
+        <li><span class="em"><i data-lucide="search" class="licon"></i>최신 트렌드 조사</span>Perplexity — 출처까지 함께 알려줍니다</li>
+        <li><span class="em"><i data-lucide="folder-search" class="licon"></i>내 자료 분석·정리</span>NotebookLM ★ — 내가 올린 자료
+          기반 AI</li>
+        <li><span class="em"><i data-lucide="languages" class="licon"></i>번역·일상 질문</span>Gemini — 무료 버전 성능 최고</li>
+        <li><span class="em"><i data-lucide="newspaper" class="licon"></i>최신 뉴스·이슈</span>Grok — X(트위터) 실시간 연동</li>
+      </ul>
+      <br>
+      <div class="hbox">
+        <p>강사에게 추천하는 <span>무료 황금 조합</span><br><br>✨ Gemini (일상 활용) + 📓 NotebookLM (자료 관리)</p>
+      </div>
+    </div>
+
+    <!-- SLIDE 8: 프롬프트란 -->
+    <div class="slide bg-dark" id="s8">
+      <div class="tag">실습① — 프롬프트</div>
+      <h2 class="title">프롬프트(Prompt)란?</h2>
+      <br>
+      <div class="hbox" style="margin-bottom:32px">
+        <p>AI에게 내리는 <span>업무 지시서</span><br>잘 쓸수록 좋은 결과가 나옵니다</p>
+      </div>
+      <div class="cards" style="max-width:700px">
+        <div class="bubble bad" style="flex:1;padding:20px">
+          <p style="font-size:16px;color:rgba(180,40,40,.85);margin-bottom:8px">❌ 나쁜 프롬프트</p>
+          <p style="font-size:18px">"강의 자료 만들어줘"</p>
+          <p style="font-size:14px;color:rgba(30,30,80,.5);margin-top:8px">→ AI가 뭘 원하는지 모릅니다</p>
+        </div>
+        <div class="bubble good" style="flex:1;padding:20px">
+          <p style="font-size:16px;color:rgba(5,120,70,.85);margin-bottom:8px">✅ 좋은 프롬프트</p>
+          <p style="font-size:17px;line-height:1.7">"너는 교육 전문가야.<br>나는 40대 직장인 대상 엑셀 강사야.<br>2시간 강의 목차를 초보자용으로<br>6챕터로
+            만들어줘."</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 9: RCAT -->
+    <div class="slide bg-purple" id="s9">
+      <div class="tag">RCAT 공식</div>
+      <h2 class="title">좋은 프롬프트의 4요소</h2>
+      <br>
+      <div class="rcat">
+        <div class="rcat-item">
+          <div class="letter" style="color:#6c63ff">R</div>
+          <h4>Role · 역할</h4>
+          <p>AI에게 역할을 부여하세요<br><em style="color:rgba(30,30,80,.5)">"너는 교육 콘텐츠 전문가야"</em></p>
+        </div>
+        <div class="rcat-item c">
+          <div class="letter" style="color:#0694c2">C</div>
+          <h4>Context · 배경</h4>
+          <p>상황과 배경을 설명하세요<br><em style="color:rgba(30,30,80,.5)">"나는 IT 비전공자 대상 강사야"</em></p>
+        </div>
+        <div class="rcat-item a">
+          <div class="letter" style="color:#05965a">A</div>
+          <h4>Action · 행동</h4>
+          <p>원하는 것을 명확히 말하세요<br><em style="color:rgba(30,30,80,.5)">"강의 목차를 만들어줘"</em></p>
+        </div>
+        <div class="rcat-item t">
+          <div class="letter" style="color:#b45a00">T</div>
+          <h4>Tone · 형식</h4>
+          <p>어조와 형식을 지정하세요<br><em style="color:rgba(30,30,80,.5)">"쉬운 언어로, 5개 항목으로"</em></p>
+        </div>
+      </div>
+      <br>
+      <p style="font-size:17px;color:rgba(30,30,80,.5)">💡 Gemini 무료 버전으로 지금 바로 실습해보세요 → gemini.google.com</p>
+    </div>
+
+    <!-- SLIDE 10: 실습① -->
+    <div class="slide bg-green" id="s10">
+      <div class="tag green">실습① — 직접 해보기</div>
+      <h2 class="title">나만의 프롬프트 작성하기</h2>
+      <br>
+      <div class="bubble good" style="max-width:700px;margin-bottom:24px;padding:20px 32px">
+        <p style="font-size:18px;line-height:2;text-align:left">
+          너는 <span style="color:#05965a;font-weight:700">[역할]</span>이야. (예: 교육 콘텐츠 전문가)<br>
+          나는 <span style="color:#0694c2;font-weight:700">[배경]</span>이야. (예: 40대 강사, 대상은 직장인)<br>
+          <span style="color:#b45a00;font-weight:700">[행동]</span>해줘. (예: 강의 목차를 만들어줘)<br>
+          <span style="color:#6c63ff;font-weight:700">[형식]</span>으로. (예: 쉬운 말로, 5개 챕터)
+        </p>
+      </div>
+      <div class="steps">
+        <div class="step">
+          <div class="num">1</div>
+          <p>gemini.google.com 접속</p>
+        </div>
+        <div class="step">
+          <div class="num">2</div>
+          <p>RCAT 공식대로 내 프롬프트 작성</p>
+        </div>
+        <div class="step">
+          <div class="num">3</div>
+          <p>결과 확인 후 "더 쉽게 써줘"로 추가 요청</p>
+        </div>
+        <div class="step">
+          <div class="num">4</div>
+          <p>채팅창에 결과 공유해주세요!</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 11: NotebookLM이란 -->
+    <div class="slide bg-teal" id="s11">
+      <div class="tag cyan">3부 — NotebookLM</div>
+      <h2 class="title">NotebookLM이란?</h2>
+      <br>
+      <div class="hbox" style="margin-bottom:28px">
+        <p>Google이 만든 <span>AI 기반 지식 관리 도구</span><br><span>완전 무료</span> — 내 자료만으로 답변하는 AI</p>
+      </div>
+      <div class="cards" style="max-width:900px">
+        <div class="card" style="border-top:3px solid #0694c2">
+          <div class="icon"><i data-lucide="folder-open" style="color:#0694c2"></i></div>
+          <h4>무엇이든 업로드</h4>
+          <p>PDF · Google Docs<br>YouTube · 웹사이트 URL</p>
+        </div>
+        <div class="card" style="border-top:3px solid #05965a">
+          <div class="icon"><i data-lucide="target" style="color:#05965a"></i></div>
+          <h4>내 자료만 참고</h4>
+          <p>업로드한 자료 안에서만 답변<br>환각 현상 최소화</p>
+        </div>
+        <div class="card" style="border-top:3px solid #6c63ff">
+          <div class="icon"><i data-lucide="zap" style="color:#6c63ff"></i></div>
+          <h4>즉시 활용 가능</h4>
+          <p>Google 계정만 있으면 OK<br>notebooklm.google.com</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 12: NotebookLM 기능 -->
+    <div class="slide bg-dark" id="s12">
+      <div class="tag">NotebookLM 핵심 기능 6가지</div>
+      <h2 class="title" style="font-size:32px">이 기능들이 강사 업무를 바꿉니다</h2>
+      <br>
+      <div class="cards" style="max-width:1000px">
+        <div class="card">
+          <div class="icon"><i data-lucide="file-text"></i></div>
+          <h4>소스 업로드</h4>
+          <p>PDF, 문서, 링크, 유튜브 모두 추가 가능</p>
+        </div>
+        <div class="card">
+          <div class="icon"><i data-lucide="message-circle"></i></div>
+          <h4>채팅 Q&A</h4>
+          <p>업로드 자료 기반 질문 답변</p>
+        </div>
+        <div class="card">
+          <div class="icon"><i data-lucide="file-pen"></i></div>
+          <h4>자동 노트 생성</h4>
+          <p>요약·학습가이드·브리핑 자동 작성</p>
+        </div>
+        <div class="card">
+          <div class="icon"><i data-lucide="layers"></i></div>
+          <h4>플래시카드</h4>
+          <p>자동 퀴즈·암기카드 생성</p>
+        </div>
+        <div class="card">
+          <div class="icon"><i data-lucide="mic"></i></div>
+          <h4>오디오 개요</h4>
+          <p>AI 팟캐스트 형식 자동 요약</p>
+        </div>
+        <div class="card">
+          <div class="icon"><i data-lucide="network"></i></div>
+          <h4>마인드맵</h4>
+          <p>내용 시각화·구조 파악</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 13: NotebookLM 활용 시나리오 -->
+    <div class="slide bg-purple" id="s13">
+      <div class="tag">강사 활용 시나리오</div>
+      <h2 class="title">NotebookLM, 이렇게 쓰세요</h2>
+      <br>
+      <div class="cards" style="max-width:1000px">
+        <div class="card" style="border-top:3px solid #6c63ff">
+          <div class="icon"><i data-lucide="library" style="color:#6c63ff"></i></div>
+          <h4>시나리오 A · 새 강의 준비</h4>
+          <p>① 관련 PDF 3~5개 업로드<br>② "2시간 강의 목차 만들어줘" 채팅<br>③ 핵심 요약 자동 생성<br>④ 플래시카드로 퀴즈 문제 생성</p>
+        </div>
+        <div class="card" style="border-top:3px solid #0694c2">
+          <div class="icon"><i data-lucide="book-open" style="color:#0694c2"></i></div>
+          <h4>시나리오 B · 교재 제작</h4>
+          <p>① 강의 노트 업로드<br>② 학습 가이드 자동 생성<br>③ 수강생에게 배포<br>→ 교재 제작 시간 80% 단축</p>
+        </div>
+        <div class="card" style="border-top:3px solid #05965a">
+          <div class="icon"><i data-lucide="headphones" style="color:#05965a"></i></div>
+          <h4>시나리오 C · 복습 자료</h4>
+          <p>① 강의 영상 YouTube 링크 추가<br>② 오디오 개요(AI 팟캐스트) 생성<br>③ 수강생 복습용으로 공유<br>→ 자동 복습 시스템 완성</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 14: 실습② -->
+    <div class="slide bg-green" id="s14">
+      <div class="tag green">실습② — NotebookLM</div>
+      <h2 class="title">지금 바로 만들어봅시다</h2>
+      <p style="font-size:17px;color:rgba(20,70,40,.7);margin-bottom:28px">준비물: Google 계정 | 접속: <a
+          href="https://notebooklm.google.com" target="_blank"
+          style="color:#0694c2;text-decoration:none;border-bottom:1px dashed #0694c2">notebooklm.google.com ↗</a></p>
+      <div class="steps" style="max-width:850px">
+        <div class="step">
+          <div class="num">1</div>
+          <p><strong>새 노트북</strong> 만들기<br>제목 입력 후 생성</p>
+        </div>
+        <div class="step">
+          <div class="num">2</div>
+          <p><strong>소스 추가</strong><br>강사 제공 PDF 업로드<br>(또는 유튜브 링크)</p>
+        </div>
+        <div class="step">
+          <div class="num">3</div>
+          <p><strong>채팅 질문</strong><br>"핵심 내용 3가지는?"<br>"퀴즈 5개 만들어줘"</p>
+        </div>
+        <div class="step">
+          <div class="num">4</div>
+          <p><strong>학습 가이드</strong> 생성<br>우측 패널 → 노트 생성<br>→ 학습 가이드 클릭</p>
+        </div>
+        <div class="step">
+          <div class="num">5</div>
+          <p><strong>오디오 개요</strong><br>AI 팟캐스트로<br>자동 생성해보기</p>
+        </div>
+      </div>
+      <br>
+      <div class="hbox" style="padding:14px 28px">
+        <p style="font-size:17px">채팅창에 결과 인증샷 올려주세요! <i data-lucide="camera"
+            style="width:16px;height:16px;vertical-align:middle;color:#0694c2"></i></p>
+      </div>
+    </div>
+
+    <!-- SLIDE 15: 마무리·로드맵 -->
+    <div class="slide bg-hero" id="s15">
+      <div class="orb orb1"></div>
+      <div class="orb orb2"></div>
+      <div class="tag">마무리</div>
+      <h2 class="title">오늘부터 시작하는 30일 로드맵</h2>
+      <br>
+      <div class="timeline">
+        <div class="tl-item">
+          <div class="tl-dot"></div>
+          <h4>이번 주</h4>
+          <p>Gemini로 강의 목차 1개 만들어보기</p>
+        </div>
+        <div class="tl-item">
+          <div class="tl-dot"></div>
+          <h4>다음 주</h4>
+          <p>NotebookLM에 내 강의 자료 올려보기</p>
+        </div>
+        <div class="tl-item">
+          <div class="tl-dot"></div>
+          <h4>한 달 후</h4>
+          <p>AI로 만든 자료로 실제 수업 진행</p>
+        </div>
+        <div class="tl-item">
+          <div class="tl-dot"></div>
+          <h4>3개월 후</h4>
+          <p>나만의 AI 활용 워크플로우 완성</p>
+        </div>
+      </div>
+      <br><br>
+      <div class="hbox">
+        <p style="font-size:19px">오늘 배운 것<br><span>RCAT 프롬프트</span> &nbsp;+&nbsp; <span>Gemini</span> &nbsp;+&nbsp;
+          <span>NotebookLM</span><br><br>이 세 가지만으로도 강의 준비가 확 달라집니다 <i data-lucide="rocket"
+            style="width:18px;height:18px;vertical-align:middle;color:#6c63ff"></i>
+        </p>
+      </div>
+      <br>
+      <p style="font-size:18px;color:rgba(30,30,80,.45)">수고하셨습니다! 질문은 채팅창에 남겨주세요 <i data-lucide="message-circle"
+          style="width:16px;height:16px;vertical-align:middle;color:#6c63ff"></i></p>
+    </div>
+
+  </div><!-- /deck -->
+
+  <div class="nav">
+    <button onclick="go(-1)">◀ 이전</button>
+    <button onclick="go(1)">다음 ▶</button>
+  </div>
+
+  <script>
+    const slides = document.querySelectorAll('.slide');
+    let cur = 0;
+    function go(d) {
+      slides[cur].classList.remove('active');
+      slides[cur].classList.add('prev');
+      setTimeout(() => slides[cur < slides.length ? cur : 0].classList.remove('prev'), 500);
+      if (d > 0 && cur < slides.length - 1) cur++;
+      else if (d < 0 && cur > 0) cur--;
+      slides[cur].classList.add('active');
+      slides[cur].classList.remove('prev');
+      update();
+    }
+    function update() {
+      const pct = ((cur + 1) / slides.length * 100).toFixed(1);
+      document.getElementById('prog').style.width = pct + '%';
+      document.getElementById('snum').textContent = (cur + 1) + ' / ' + slides.length;
+    }
+    document.addEventListener('keydown', e => {
+      if (e.key === 'ArrowRight' || e.key === 'ArrowDown') go(1);
+      if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') go(-1);
+    });
+    update();
+    lucide.createIcons();
+  </script>
+</body>
+
+</html>
